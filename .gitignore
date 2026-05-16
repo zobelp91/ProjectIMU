@@ -1,1 +1,11 @@
 .vs
+*.slnx.sqlite
+*.suo
+__pycache__/
+*.pyc
+*.pyo
+venv/
+env/
+.env
+*.egg-info/
+.pytest_cache/
