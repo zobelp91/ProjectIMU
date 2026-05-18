@@ -1,18 +1,18 @@
 """ Mathematical Library
 """
-from math import sqrt
+import math as m
 import numpy as np
 
-def pythagoras(*sites):
-    """ calculates the pythagorean distance from a various number of arguments
+def eucl(*sites):
+    """ calculates euclidean distance from a various number of arguments
     """
     res = 0
     for i in sites:
         res += i ** 2
-    return sqrt(res)
+    return m.sqrt(res)
 
 def toVector(a, b, c, d='none'):
-    """ transforms 3 or 4 scalars to a 3x1 numpy np.matrix
+    """ transforms 3 or 4 scalar values to a nx1 numpy np.matrix
     """
     assert d == 'none' or isinstance(d, (int, np.long, float)), "Not a valid input for d"
     if isinstance(d, (int, np.long, float)) :
@@ -20,10 +20,9 @@ def toVector(a, b, c, d='none'):
     else: 
         vector = np.matrix([a, b, c])
     return vector.transpose()    
-    
 
 def toValue(mat):
-    """ transforms a 3x1 numpy np.matrix to scalars
+    """ transforms a nx1 numpy np.matrix to scalars
         same as x1, x2, x3 = numpy.np.matrix()
     """
     dim = np.shape(mat)
@@ -59,5 +58,4 @@ def runningAverage(old, new, weight):
         old, new is either a scalar or vector 
         weight is the reciprocal of times this function was called
     """
-    K = weight
-    return old + K*(new - old)
+    return old + weight*(new - old)

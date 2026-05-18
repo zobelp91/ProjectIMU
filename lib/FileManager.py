@@ -1,13 +1,11 @@
-from numpy import genfromtxt, deg2rad, append, diag, std
-from os.path import dirname, join, abspath
-from os import getcwd
 """ File import library 
 """
-
+from os.path import dirname, join, abspath
+from os import getcwd
 import pynmea2
-from Position import EllipsoidPosition
-from MathLib import toVector
-from GeoLib import ell2xyz
+import numpy as np
+import mathlib as ml
+import geolib as gl
 
 class CSVImporter(object):
     """ function for importing CSV data
@@ -21,7 +19,7 @@ class CSVImporter(object):
         filePath = join(projectPath,fileStr)
         
         self.path = filePath
-        self.values = genfromtxt(filePath, delimiter = ',', invalid_raise = False,
+        self.values = np.genfromtxt(filePath, delimiter = ',', invalid_raise = False,
                                   usecols = columns, skip_header = skip_header)
         if hasTime:
             self.sampleRate = self.getSampleRate() 
@@ -41,8 +39,8 @@ class NMEAImporter(object):
     """ imports either a file or another source of NMEA data
     """
     def __init__(self, fileStr):
-        """ reads NMEA string and converts them to a List of cartesian Positions and a list of the 
-            related time in seconds
+        """ reads NMEA position (GGA) and converts them to a list of cartesian positions 
+            and reads the timestamps in seconds
             using pynmea2 package
         """
         projectPath = dirname(abspath(getcwd()))
@@ -60,10 +58,9 @@ class NMEAImporter(object):
                 for msg in streamreader.next():
                     if msg.sentence_type == 'GGA':
                         he = float(msg.altitude) + float(msg.geo_sep) #m
-                        lat = deg2rad(msg.latitude)
-                        lon = deg2rad(msg.longitude)
-                        p_geo = EllipsoidPosition(toVector(lat,lon,he))
-                        p_cart = ell2xyz(p_geo)
+                        lat = np.deg2rad(msg.latitude)
+                        lon = np.deg2rad(msg.longitude)
+                        p_cart = gl.ell2xyz(lat, lon, he)
                         t = msg.timestamp 
                         t_sec = (t.hour*3600 + t.minute*60 + t.second)                    
                         self.P.append(p_cart)
@@ -73,10 +70,12 @@ class NMEAImporter(object):
         self.sampleRate = (self.t[-1]-self.t[0])/self.length
         
 def getNumberOfLines(fname):
+    """ counts the number of lines in a file
+    """
     return sum(1 for line in open(fname))
     
 def main():
-    fileStr = "data\\arduino10DOF\\linie_dach_imu.csv"
+    fileStr = "ProjectIMU\\data\\adafruit10DOF\\linie_dach_imu.csv" # find file
     data = CSVImporter(fileStr, columns=range(0, 13), skip_header=7, hasTime=True)  
     print(data.values[0,0])
     print(1/data.sampleRate)
