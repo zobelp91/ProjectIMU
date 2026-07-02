@@ -4,7 +4,7 @@
 import math as m
 import numpy as np
 
-# TODO: eucl/pythagoras can be replaced with np.linalg.norm
+# TODO: eucl/pythagoras can be replaced with math.hypot
 
 
 def toVector(a, b, c, d="none"):
