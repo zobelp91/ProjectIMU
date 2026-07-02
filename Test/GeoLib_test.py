@@ -1,8 +1,8 @@
 import unittest
-from GeoLib import earthCurvature, ell2xyz
+from geolib import earthCurvature, ell2xyz
 from math import pi
 from Position import EllipsoidPosition
-from MathLib import toVector, toValue
+from veclib import toVector, toValue
 from numpy import deg2rad
 
 class GeoLib_test(unittest.TestCase):

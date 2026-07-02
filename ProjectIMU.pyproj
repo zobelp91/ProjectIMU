@@ -5,8 +5,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{de64354b-9cfd-496d-a785-f0864d72e83f}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>main.py</StartupFile>
-    <SearchPath>src;RPi;lib;examples;data;Test</SearchPath>
+    <StartupFile>Test/test.py</StartupFile>
+    <SearchPath>src;RPi;examples;data;Test;lib</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
@@ -15,6 +15,7 @@
     <TestFramework>Pytest</TestFramework>
     <IsWindowsApplication>False</IsWindowsApplication>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
+    <SuppressPackageInstallationPrompt>True</SuppressPackageInstallationPrompt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
@@ -34,7 +35,7 @@
     <Compile Include="examples\Strapdown_360plot.py" />
     <Compile Include="lib\filemanager.py" />
     <Compile Include="lib\geolib.py" />
-    <Compile Include="lib\mathlib.py" />
+    <Compile Include="lib\veclib.py" />
     <Compile Include="lib\plothelper.py" />
     <Compile Include="main.py" />
     <Compile Include="RPi\gpsd-py3-master\gpsd\__init__.py" />

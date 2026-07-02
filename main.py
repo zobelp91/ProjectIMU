@@ -1,5 +1,5 @@
 import constants
-import FileManager
-import GeoLib
-import MathLib
-import PlotHelper
+import geolib
+import veclib
+import plothelper
+import filemanager
