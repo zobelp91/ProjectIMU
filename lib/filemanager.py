@@ -7,6 +7,7 @@ import pynmea2
 import numpy as np
 import geolib as gl
 
+import pathlib as pl
 
 class CSVImporter(object):
     """function for importing CSV data"""
@@ -23,8 +24,7 @@ class CSVImporter(object):
         skips lines with inconsistent columns
         returns array of values
         """
-        projectPath = dirname(abspath(getcwd()))
-        filePath = join(projectPath, fileStr)
+        filePath = pl.Path(fileStr).resolve()
 
         self.path = filePath
         self.values = np.genfromtxt(

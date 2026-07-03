@@ -1,18 +1,18 @@
 """ class Strapdown generates bearing, velocity and position from 9 degree IMU readings
 """
-from Euler import Euler
-from MathLib import toVector, runningAverage
-from Position import Position
-from Quaternion import Quaternion
-from Velocity import Velocity
-from Kalman import Kalman
-from FileManager import CSVImporter
-from PlotHelper import plot3DFrame
+import Euler as eu
+import veclib as vl
+import Position as pos
+import Quaternion as quat
+import Velocity as vel
+import Kalman as k
+import filemanager as fm
+import plothelper as ph
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from datetime import datetime 
-from numpy import rad2deg, std
-from math import sqrt, pi
+import numpy as np
+import math as m
 
 class Strapdown(object):
     def __init__(self):
