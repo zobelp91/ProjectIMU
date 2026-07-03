@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{de64354b-9cfd-496d-a785-f0864d72e83f}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>Test/test.py</StartupFile>
+    <StartupFile>main.py</StartupFile>
     <SearchPath>src;RPi;examples;data;Test;lib</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
