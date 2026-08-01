@@ -1,10 +1,7 @@
 
 """File import library"""
 
-import pynmea2
 import numpy as np
-import geolib as gl
-
 import pathlib as pl
 
 SEPSYM = ","

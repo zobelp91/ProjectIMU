@@ -2,7 +2,7 @@ import unittest
 import filemanager as fm
 
 
-class filemanager_test(unittest.TestCase):
+class FilemanagerTest(unittest.TestCase):
     # IMU files (10Hz)
     def test_10min_calib_360(self):
         self._assertImuDataOk(fm.ImuDataImporter("data\\adafruit10DOF\\10hz\\10min_calib_360.csv"))

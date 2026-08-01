@@ -36,8 +36,9 @@
     <Compile Include="lib\filemanager.py" />
     <Compile Include="lib\geolib.py" />
     <Compile Include="lib\test\filemanager_test.py" />
-    <Compile Include="lib\veclib.py" />
     <Compile Include="lib\plothelper.py" />
+    <Compile Include="lib\test\veclib_test.py" />
+    <Compile Include="lib\veclib.py" />
     <Compile Include="main.py" />
     <Compile Include="RPi\gpsd-py3-master\gpsd\__init__.py" />
     <Compile Include="RPi\gpsd-py3-master\setup.py" />

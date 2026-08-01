@@ -4,7 +4,7 @@ import numpy as np
 
 
 class Quaternion(object):
-    """class Quaternion describes the transformation between 2 coordinate systems um.sing 4 parameters"""
+    """class Quaternion describes the transformation between 2 coordinate systems using 4 parameters"""
 
     def __init__(self, euler=vl.toVector(0.0, 0.0, 0.0)):
         """Quaternion is initiated by Euler angles
@@ -128,3 +128,14 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+    #TODO: move to quaternion.py
+# def mvMultiplication(vector1, vector2):
+#     """np.matrix-vector multiplication
+#     returns a 4x1 vector
+#     """
+#     a, b, c, d = toValue(vector1)
+#     return (
+#         np.matrix([[a, -b, -c, -d], [b, a, -d, c], [c, d, a, -b], [d, -c, b, a]])
+#         * vector2
+#     )
