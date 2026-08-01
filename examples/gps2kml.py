@@ -1,3 +1,5 @@
+"""reads a csv file with gps data and creates a kml file with the positions"""
+
 import simplekml
 import filemanager as fm
 

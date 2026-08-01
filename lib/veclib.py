@@ -4,8 +4,6 @@
 import math as m
 import numpy as np
 
-# TODO: eucl/pythagoras can be replaced with math.hypot
-
 
 def toVector(a, b, c, d="none"):
     """transforms 3 or 4 scalar values to a nx1 numpy np.matrix"""

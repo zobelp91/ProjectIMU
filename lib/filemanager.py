@@ -1,87 +1,90 @@
 
 """File import library"""
 
-from os.path import dirname, join, abspath
-from os import getcwd
 import pynmea2
 import numpy as np
 import geolib as gl
 
 import pathlib as pl
 
-class CSVImporter(object):
-    """function for importing CSV data"""
+SEPSYM = ","
 
-    def __init__(
-        self,
-        fileStr,
-        delimiter=",",
-        columns=(0, 2, 3, 4, 6, 7, 8, 10, 11, 12),
-        hasTime=False,
-        skip_header=0,
-    ):
-        """reads txt-file in project directory
-        skips lines with inconsistent columns
-        returns array of values
-        """
-        filePath = pl.Path(fileStr).resolve()
-
-        self.path = filePath
-        self.values = np.genfromtxt(
-            filePath,
-            delimiter=",",
-            invalid_raise=False,
-            usecols=columns,
-            skip_header=skip_header,
-        )
-        if hasTime:
-            self.sampleRate = self.getSampleRate()
-        else:
-            self.sampleRate = None
-        self.length = len(self.values)
-
-    def getSampleRate(self):
-        """gets average time step size"""
-        numTime = self.values[:, 0]
-        timeSpan = numTime[-1] - numTime[0]
-        return timeSpan / len(numTime)
-
-
-class NMEAImporter(object):
-    """imports either a file or another source of NMEA data"""
+class FileImporter(object):
+    """base class for importing data from a csv file"""
 
     def __init__(self, fileStr):
-        """reads NMEA position (GGA) and converts them to a list of cartesian positions
-        and reads the timestamps in seconds
-        using pynmea2 package
-        """
-        projectPath = dirname(abspath(getcwd()))
-        filePath = join(projectPath, fileStr)
+        """intializes the class fields and checks if the file exists"""
+        self.path = pl.Path(fileStr).resolve()
+        self.numCol = self._getNumCol()
+        self.values = self._read() 
+        self.length = len(self.values)
+        self.time = self.values[:, 0]
+        self.dt = self._getSampleRate()
+        print(f"FileImporter: {self.path} Sample rate: {self.dt:.3f} s")
 
-        self.path = filePath
+    def _read(self):
+        """reads the file and populates class fields"""
+        pass
 
-        self.P = []
-        self.t = []
+    def _getSampleRate(self):
+        """gets median time step size"""
+        return np.median(np.diff(self.time))
 
-        with open(filePath, "r") as fread:
-            fileLen = getNumberOfLines(filePath)
-            streamreader = pynmea2.NMEAStreamReader(fread, "ignore")
-            for _ in range(fileLen):
-                for msg in streamreader.next():
-                    if msg.sentence_type == "GGA":
-                        he = float(msg.altitude) + float(msg.geo_sep)  # m
-                        lat = np.deg2rad(msg.latitude)
-                        lon = np.deg2rad(msg.longitude)
-                        p_cart = gl.ell2xyz(lat, lon, he)
-                        t = msg.timestamp
-                        t_sec = t.hour * 3600 + t.minute * 60 + t.second
-                        self.P.append(p_cart)
-                        self.t.append(t_sec)
+    def _getNumCol(self):
+        """gets the number of columns in the file"""
+        with open(self.path) as f:
+            sepCount = f.readlines()[self.skipHeader].count(SEPSYM)
+        return sepCount + 1
 
-        self.length = len(self.t)
-        self.sampleRate = (self.t[-1] - self.t[0]) / self.length
+class ImuDataImporter(FileImporter):
+    """ class for importing IMU data from a CSV file """
 
+    def __init__(self, fileStr):
+        self.skipHeader = 7
+        super().__init__(fileStr) 
+        self.gyroX = self.values[:,1]
+        self.gyroY = self.values[:,2]
+        self.gyroZ = self.values[:,3]
+        self.accelX = self.values[:,4]
+        self.accelY = self.values[:,5]
+        self.accelZ = self.values[:,6]
+        self.magX = self.values[:,7]
+        self.magY = self.values[:,8]
+        self.magZ = self.values[:,9]
+        self.phi = self.values[:,10]
+        self.theta = self.values[:,11]
+        self.psi = self.values[:,12]
 
-def getNumberOfLines(fname):
-    """counts the number of lines in a file"""
-    return sum(1 for line in open(fname))
+    def _read(self):
+        return np.genfromtxt(
+            self.path,
+            delimiter=SEPSYM,
+            invalid_raise=True,
+            usecols=range(self.numCol),
+            skip_header=self.skipHeader)
+
+class GpsDataImporter(FileImporter):
+    """ class for importing GPS data from a CSV file"""
+
+    def __init__(self, fileStr):
+        self.skipHeader = 1
+        super().__init__(fileStr)
+        self.latitude = self.values[:,1] #deg
+        self.longitude = self.values[:,2] #deg
+        self.height = self.values[:,3] #m
+        self.vx = self.values[:,4] #m/s
+        self.vy = self.values[:,5] #m/s
+        self.vz = self.values[:,6] #m/s
+        if self.numCol > 7:
+            self.stdX = self.values[:,7] #m 95% confidence
+            self.stdY = self.values[:,8] #m 95% confidence
+            self.stdZ = self.values[:,9] #m 95% confidence
+            self.numSats = self.values[:,10]
+
+    def _read(self):
+        return np.genfromtxt(
+            self.path,
+            delimiter=SEPSYM,
+            invalid_raise=True,
+            usecols=range(self.numCol),
+            skip_header=self.skipHeader)

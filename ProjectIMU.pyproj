@@ -35,6 +35,7 @@
     <Compile Include="examples\Strapdown_360plot.py" />
     <Compile Include="lib\filemanager.py" />
     <Compile Include="lib\geolib.py" />
+    <Compile Include="lib\test\filemanager_test.py" />
     <Compile Include="lib\veclib.py" />
     <Compile Include="lib\plothelper.py" />
     <Compile Include="main.py" />
@@ -64,30 +65,23 @@
     <Compile Include="Test\Velocity_test.py" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="data\adafruit10DOF\10min_calib_360.csv" />
-    <Content Include="data\adafruit10DOF\10min_calib_wTilt.csv" />
-    <Content Include="data\adafruit10DOF\1hr_Bias_stability_fast.csv" />
-    <Content Include="data\adafruit10DOF\20min_sample.csv" />
-    <Content Include="data\adafruit10DOF\40min_mag_fixed.csv" />
-    <Content Include="data\adafruit10DOF\gyroBias_wTilt.csv" />
-    <Content Include="data\adafruit10DOF\linie_dach_imu.csv" />
-    <Content Include="data\adafruit10DOF\sample_brueckenmodell.csv" />
-    <Content Include="data\adafruit10DOF\sample_dach_imu.csv" />
-    <Content Include="data\adafruit10DOF\sample_gyroBias.csv" />
-    <Content Include="data\adafruit10DOF\sample_Hubarm.csv" />
-    <Content Include="data\adafruit10DOF\sample_imu_beuth_0801.csv" />
-    <Content Include="data\adafruit10DOF\slowTilt.csv" />
-    <Content Include="data\adafruit10DOF\Tilt180_w100Hz.csv" />
-    <Content Include="data\adafruit10DOF\Tilt_w100Hz.csv" />
-    <Content Include="data\CalInertialAndMag.csv" />
-    <Content Include="data\data_overview.xlsx" />
-    <Content Include="data\myStreamApp\mystream_gravity_fast2.csv" />
-    <Content Include="data\myStreamApp\myStream_gravity_fast_excel.csv" />
-    <Content Include="data\myStreamApp\mystream_lowDynamic.csv" />
-    <Content Include="data\myStreamApp\mystream_realFrame_fast.csv" />
-    <Content Include="data\myStreamApp\mystream_tiltedAorundAxes.csv" />
+    <Content Include="data\adafruit10DOF\10hz\10min_calib_360.csv" />
+    <Content Include="data\adafruit10DOF\100hz\10min_calib_wTilt.csv" />
+    <Content Include="data\adafruit10DOF\10hz\1hr_Bias_stability_fast.csv" />
+    <Content Include="data\adafruit10DOF\10hz\20min_sample.csv" />
+    <Content Include="data\adafruit10DOF\10hz\40min_mag_fixed.csv" />
+    <Content Include="data\adafruit10DOF\100hz\gyroBias_wTilt.csv" />
+    <Content Include="data\adafruit10DOF\10hz\linie_dach_imu.csv" />
+    <Content Include="data\adafruit10DOF\10hz\sample_brueckenmodell.csv" />
+    <Content Include="data\adafruit10DOF\10hz\sample_dach_imu.csv" />
+    <Content Include="data\adafruit10DOF\100hz\sample_gyroBias.csv" />
+    <Content Include="data\adafruit10DOF\10hz\sample_Hubarm.csv" />
+    <Content Include="data\adafruit10DOF\10hz\sample_imu_beuth_0801.csv" />
+    <Content Include="data\adafruit10DOF\100hz\slowTilt.csv" />
+    <Content Include="data\adafruit10DOF\100hz\Tilt180_w100Hz.csv" />
+    <Content Include="data\adafruit10DOF\100hz\Tilt_w100Hz.csv" />
     <Content Include="data\UltimateGPS\20min_sample.csv" />
-    <Content Include="data\UltimateGPS\GPRMC_stream.csv" />
+    <Content Include="data\UltimateGPS\NMEA\GPRMC_stream.csv" />
     <Content Include="data\UltimateGPS\linie_dach_gps.csv" />
     <Content Include="data\UltimateGPS\sample_dach_gps.csv" />
     <Content Include="data\UltimateGPS\sample_gps_beuth_0801.csv" />
@@ -98,14 +92,18 @@
   <ItemGroup>
     <Folder Include="data\" />
     <Folder Include="data\adafruit10DOF\" />
-    <Folder Include="data\myStreamApp\" />
+    <Folder Include="data\adafruit10DOF\10hz\" />
+    <Folder Include="data\adafruit10DOF\100hz\" />
+    <Folder Include="data\UltimateGPS\NMEA\" />
     <Folder Include="data\UltimateGPS\" />
     <Folder Include="examples" />
     <Folder Include="lib" />
+    <Folder Include="lib\test\" />
     <Folder Include="RPi" />
     <Folder Include="RPi\gpsd-py3-master" />
     <Folder Include="RPi\gpsd-py3-master\gpsd" />
     <Folder Include="src" />
+    <Folder Include="src\test\" />
     <Folder Include="Test" />
   </ItemGroup>
   <ItemGroup>

@@ -281,16 +281,3 @@ def getVKMatrix(rms):
     """
     nn = np.power(rms, 2)
     return np.matrix(np.diag(nn))
-
-
-def main():
-    print(getVKMatrix([1] * 3 + [0.5] * 3))
-    K = KalmanPVO()
-    print(K.Q)
-    q = quat.Quaternion()
-    K.timeUpdate(vl.toVector(0.1, 0.2, 9.81), q, 0.01)
-    print(K.P)
-
-
-if __name__ == "__main__":
-    main()
