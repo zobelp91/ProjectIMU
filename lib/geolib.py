@@ -4,7 +4,7 @@
 import math as m
 import numpy as np
 import veclib as vl
-
+import ellipsoid as el
 
 class Earth:
     def __init__(self):
@@ -21,23 +21,20 @@ class Earth:
         self.magfield = vl.Vector(18636.7, 1197.4, 45940.6) / 1000  # WMM
         self.declination = np.deg2rad(3.0 + 40.0 / 60.0 + 34.0 / 3600.0)  # Declination = 3 40 34
 
-        """GRS80 ellipsoid parameters
-        constants from https://en.wikipedia.org/wiki/GRS_80
+        """ellipsoid parameters
         """
-        self.GRS80_a = 6378137.0  # m
-        self.GRS80_b = 6356752.314  # m
-        self.GRS80_f = (self.GRS80_a - self.GRS80_b) / self.GRS80_a
-        self.e2 = m.sqrt(self.GRS80_f * (2.0 - self.GRS80_f))**2.0  # first eccentricity squared
+        self.GRS80 = el.GRS80
+        self.WGS84 = None  # WGS84 not implemented yet
 
-    def curvature(self, lat):
+    def curvature(self, lat, ellipsoid=el.GRS80):
         """calculates radius of curvature in North and East for a given latitude
         """
         sinLat2 = m.sin(lat) ** 2.0
-        Rn = self.GRS80_a * ((1.0 - self.e2) / (1.0 - self.e2 * sinLat2) ** (1.5))
-        Re = self.GRS80_a / m.sqrt(1.0 - self.e2 * sinLat2)
+        Rn = ellipsoid.a * ((1.0 - ellipsoid.e2) / (1.0 - ellipsoid.e2 * sinLat2) ** (1.5))
+        Re = ellipsoid.a / m.sqrt(1.0 - ellipsoid.e2 * sinLat2)
         return Rn, Re
 
-    def ell2xyz(self, lat, lon, he):
+    def ell2xyz(self, lat, lon, he, ellipsoid=el.GRS80):
         """transformation of geographic coordinates to cartesian coordinates
         input are latitude, longitude, height in radian and meter
         returns a 3x1 vector
@@ -47,5 +44,5 @@ class Earth:
         sinLat = m.sin(lat)
         x = (N + he) * cosLat * m.cos(lon)
         y = (N + he) * cosLat * m.sin(lon)
-        z = N * sinLat * (self.GRS80_b**2 / self.GRS80_a**2) + he * sinLat
+        z = N * sinLat * (ellipsoid.b**2 / ellipsoid.a**2) + he * sinLat
         return vl.Vector(x, y, z)

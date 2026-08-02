@@ -40,10 +40,10 @@ class GeoLibTest(unittest.TestCase):
         self.assertAlmostEqual(self.earth.declination, expected_declination, places=5)
 
         # Test GRS80 ellipsoid parameters
-        self.assertAlmostEqual(self.earth.GRS80_a, 6378137.0, places=1)
-        self.assertAlmostEqual(self.earth.GRS80_b, 6356752.314, places=1)
-        self.assertGreater(self.earth.GRS80_f, 0)
-        self.assertLess(self.earth.GRS80_f, 0.01)  # Flattening should be small
+        self.assertAlmostEqual(self.earth.GRS80.a, 6378137.0, places=1)
+        self.assertAlmostEqual(self.earth.GRS80.b, 6356752.314, places=1)
+        self.assertGreater(self.earth.GRS80.f, 0)
+        self.assertLess(self.earth.GRS80.f, 0.01)  # Flattening should be small
 
     def test_curvature_at_equator(self):
         """Test radius of curvature at the equator
@@ -56,9 +56,9 @@ class GeoLibTest(unittest.TestCase):
         Rn, Re = self.earth.curvature(lat_equator)
 
         # At equator: Rn should be approximately calculated value
-        # and Re should be approximately GRS80_a
+        # and Re should be approximately ellipsoid.a
         self.assertAlmostEqual(Rn, 6335439.33, places=0)  # Expected Rn at equator
-        self.assertAlmostEqual(Re, self.earth.GRS80_a, places=0)
+        self.assertAlmostEqual(Re, self.earth.GRS80.a, places=0)
 
         # Radius of curvature must be positive
         self.assertGreater(Rn, 0)
@@ -77,8 +77,8 @@ class GeoLibTest(unittest.TestCase):
         Rn_pole, Re_pole = self.earth.curvature(lat_north_pole)
 
         # At poles, both Rn and Re should be close to each other
-        # and approximately equal to GRS80_a / sqrt(1 - e2)
-        expected_radius = self.earth.GRS80_a / m.sqrt(1.0 - self.earth.e2)
+        # and approximately equal to ellipsoid.a / sqrt(1 - ellipsoid.e2)
+        expected_radius = self.earth.GRS80.a / m.sqrt(1.0 - self.earth.GRS80.e2)
 
         self.assertAlmostEqual(Rn_pole, expected_radius, places=0)
         self.assertAlmostEqual(Re_pole, expected_radius, places=0)
@@ -100,10 +100,10 @@ class GeoLibTest(unittest.TestCase):
         self.assertGreater(Rn, 0)
         self.assertGreater(Re, 0)
 
-        # At Berlin's latitude, Rn should be between GRS80_b and GRS80_a; Re is the prime vertical radius (>= GRS80_a)
-        self.assertGreater(Rn, self.earth.GRS80_b)
-        self.assertLess(Rn, self.earth.GRS80_a)
-        self.assertGreater(Re, self.earth.GRS80_a)
+        # At Berlin's latitude, Rn should be between ellipsoid.b and ellipsoid.a; Re is the prime vertical radius (>= ellipsoid.a)
+        self.assertGreater(Rn, self.earth.GRS80.b)
+        self.assertLess(Rn, self.earth.GRS80.a)
+        self.assertGreater(Re, self.earth.GRS80.a)
 
         # At this latitude, Re should be greater than Rn
         self.assertGreater(Re, Rn)
@@ -120,10 +120,10 @@ class GeoLibTest(unittest.TestCase):
         x_eq, y_eq, z_eq = self.earth.ell2xyz(0.0, 0.0, 0.0)()
 
         # At equator and prime meridian with zero height:
-        # x should be approximately GRS80_a (semi-major axis)
+        # x should be approximately ellipsoid.a (semi-major axis)
         # y should be approximately 0
         # z should be approximately 0
-        self.assertAlmostEqual(float(x_eq), self.earth.GRS80_a, places=-1)
+        self.assertAlmostEqual(float(x_eq), self.earth.GRS80.a, places=-1)
         self.assertAlmostEqual(float(y_eq), 0, places=0)
         self.assertAlmostEqual(float(z_eq), 0, places=0)
 
@@ -133,10 +133,10 @@ class GeoLibTest(unittest.TestCase):
 
         # At North Pole:
         # x and y should be approximately 0
-        # z should be approximately GRS80_b (semi-minor axis)
+        # z should be approximately ellipsoid.b (semi-minor axis)
         self.assertAlmostEqual(float(x_pole), 0, places=0)
         self.assertAlmostEqual(float(y_pole), 0, places=0)
-        self.assertAlmostEqual(float(z_pole), self.earth.GRS80_b, places=-1)
+        self.assertAlmostEqual(float(z_pole), self.earth.GRS80.b, places=-1)
 
         # Test 3: Verify return type is Vector
         result = self.earth.ell2xyz(np.deg2rad(52.52), np.deg2rad(13.40), 0.0)

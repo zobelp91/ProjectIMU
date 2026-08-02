@@ -17,7 +17,6 @@ class FileImporter(object):
         self.length = len(self.values)
         self.time = self.values[:, 0]
         self.dt = self._getSampleRate()
-        print(f"FileImporter: {self.path} Sample rate: {self.dt:.3f} s")
 
     def _read(self):
         """reads the file and populates class fields"""

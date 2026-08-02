@@ -35,9 +35,11 @@
     <Compile Include="examples\Strapdown_360plot.py" />
     <Compile Include="lib\filemanager.py" />
     <Compile Include="lib\geolib.py" />
+    <Compile Include="lib\ellipsoid.py" />
     <Compile Include="lib\test\filemanager_test.py" />
     <Compile Include="lib\plothelper.py" />
     <Compile Include="lib\test\geolib_test.py" />
+    <Compile Include="lib\test\plothelper_test.py" />
     <Compile Include="lib\test\veclib_test.py" />
     <Compile Include="lib\veclib.py" />
     <Compile Include="main.py" />
@@ -53,6 +55,8 @@
     <Compile Include="src\Position.py" />
     <Compile Include="src\Quaternion.py" />
     <Compile Include="src\Strapdown.py" />
+    <Compile Include="src\test\Position_test.py" />
+    <Compile Include="src\test\Velocity_test.py" />
     <Compile Include="src\Velocity.py" />
     <Compile Include="Test\EllipsoidPosition_test.py" />
     <Compile Include="Test\Euler_test.py" />
@@ -62,7 +66,7 @@
     <Compile Include="Test\Position_test.py" />
     <Compile Include="Test\Quaternion_test.py" />
     <Compile Include="Test\Strapdown_test.py" />
-    <Compile Include="Test\test.py" />
+    <Compile Include="test.py" />
     <Compile Include="Test\Velocity_test.py" />
   </ItemGroup>
   <ItemGroup>

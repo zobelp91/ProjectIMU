@@ -1,72 +1,61 @@
-import veclib as vl
-import geolib as gl
 import numpy as np
 import math as m
+import veclib as vl
+import geolib as gl
 
-
-class Position(object):
-    """class Position discribes the propagation of the position in a navigational frame
-    depending a velocity and the previous position
+class Position():
+    """class representing the current NED-position. Propagated by velocity
+    unit in m
     """
 
-    def __init__(self, vector=vl.toVector(0.0, 0.0, 0.0)):
-        """initialized by a position-vector
-        units are given in m
-        """
+    def __init__(self, vector=vl.Vector()):
         self.values = vector
 
     def __str__(self):
         px, py, pz = vl.toValue(self.values)
         return "N: {:9.3f} m, E: {:9.3f} m, D: {:9.3f} m".format(px, py, pz)
 
-    def update(self, velocity, DT):
+    def update(self, velocity, dt):
         """updates current position based on previous position and velocity
         velocity-object has attribute values in m/s
         """
-        self.values += DT * velocity.values
-
-
-class EllipsoidPosition(object):
-    """class EllipsoidPosition discribes the propagation of the position in a ECEF-frame
-    depending a velocity and the previous position
-    """
-
-    def __init__(self, vector=vl.toVector(0.0, 0.0, 0.0)):
-        """gets initialized by position-vector
-        units are kept in radian using lat, lon, h-order
-        used ellisoid-model is GRS80
-        """
-        self.values = vector  # (rad, rad, m)
-        self.a = 6378137.0  # GRS80
-        self.b = 6356752.314
-        self.f = (self.a - self.b) / self.a
-
-    def __str__(self):
-        lat, lon, h = vl.toValue(self.values)
-        return "Lat: {:4.6f} deg, Lon: {:4.6f} deg, H: {:4.3f} m".format(
-            np.rad2deg(lat), np.rad2deg(lon), h
-        )
-
-    def update(self, velocity, DT):
-        """updates current position based on previous position and velocity
-        velocity-object has attribute values in m/s
-        """
-        lat, _, h = vl.toValue(self.values)
-        Rn, Re = gl.earthCurvature(self.a, self.f, lat)
-        M = np.eye(3, 3)
-        M[0, 0] = 1 / (Rn - h)
-        M[1, 1] = 1 / ((Re - h)) * m.cos(lat)
-        M[2, 2] = 1
-
-        self.values += (DT * M) * velocity.values
+        self.values += dt * velocity.values
 
     def correct(self, vector):
         """vector is defined as (N, E, D) in meter"""
-        lat, _, h = vl.toValue(self.values)
-        Rn, Re = gl.earthCurvature(self.a, self.f, lat)
-        M = np.eye(3, 3)
-        M[0, 0] = 1 / (Rn - h)
-        M[1, 1] = 1 / ((Re - h)) * m.cos(lat)
-        M[2, 2] = 1
+        self.values += vector
 
-        self.values += M * vector
+
+class EllipsoidPosition(object):
+    """class representing the position on a ellipsoid in LLH. Propagated by velocity
+    unit in radian and m
+    """
+
+    def __init__(self, vector=vl.Vector()):
+        self.values = vector  # (rad, rad, m)
+        self.earthParameter = gl.Earth()
+        self.ellipsoid = "GRS80"
+
+    def __str__(self):
+        lat, lon, h = self.values()
+        return "Lat: {:4.6f} deg, Lon: {:4.6f} deg, H: {:4.3f} m".format(
+            np.rad2deg(lat), np.rad2deg(lon), h)
+
+    def update(self, velocity, dt):
+        """updates current position based on previous position and velocity
+        velocity-object has attribute values in m/s
+        """
+        self.values += np.dot(dt * self._NED2ECEF(), velocity.values)
+
+    def correct(self, vector):
+        """vector is defined as (N, E, D) in meter"""
+        self.values += np.dot(self._NED2ECEF(), vector)
+
+    def _NED2ECEF(self):
+        lat, _, h = self.values()
+        Rn, Re = self.earthParameter.curvature(lat, self.earthParameter.GRS80)
+        M = np.eye(3, 3)
+        M[0, 0] = 1.0 / (Rn - h)
+        M[1, 1] = 1.0 / ((Re - h)) * m.cos(lat)
+        M[2, 2] = 1.0
+        return M

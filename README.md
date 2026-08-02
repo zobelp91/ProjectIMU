@@ -14,3 +14,7 @@ The following external libraries are required:
 - **matplotlib** - Data visualization and plotting
 - **pynmea2** - NMEA GPS data processing
 - **simplekml** - KML file creation
+
+## Tests
+
+Execute tests using __test.py__ in root
