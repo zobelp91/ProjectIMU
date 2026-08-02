@@ -6,7 +6,7 @@ import pathlib as pl
 
 SEPSYM = ","
 
-class FileImporter(object):
+class FileImporter:
     """base class for importing data from a csv file"""
 
     def __init__(self, fileStr):

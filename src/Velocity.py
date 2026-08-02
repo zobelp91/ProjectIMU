@@ -1,15 +1,13 @@
 import veclib as vl
 import geolib as gl
 
-class Velocity:
+class Velocity(vl.Vector):
     """class representing NED-Velocity. propagated by acceleration
     units in m/s
-    """
-    def __init__(self, vector=vl.Vector()):
-        self.values = vector
+    """ 
 
     def __str__(self):
-        vx, vy, vz = self.values()
+        vx, vy, vz = self()
         return "vx: {:4.2f} m/s, vy: {:4.3f} m/s, vz: {:4.3f} ms".format(vx, vy, vz)
 
     def update(self, acceleration, quaternion, dt):
@@ -17,10 +15,10 @@ class Velocity:
         acceleration given in m/s2
         """
         an = quaternion.vecTransformation(acceleration)
-        self.values += dt * (an + gl.Earth().G)
+        self += dt * (an + gl.Earth().G)
 
     def correct(self, vector):
-        self.values += vector
+        self += vector
 
 
 def calcVelocity(p1, p0, t1, t0):

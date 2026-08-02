@@ -7,10 +7,10 @@ import numpy as np
 class Vector(np.ndarray):
     """Derived class for handling 1-dimensional arrays"""
 
-    def __new__(cls, a=0, b=0, c=0):
+    def __new__(cls, a=0, b=0, c=0, info=None):
         # create a new instance as a column vector
         obj = np.asarray(list(map(float, [a, b, c]))).reshape(-1,1).view(cls)
-        obj.info = None
+        obj.info = info
         return obj
 
     def __array_finalize__(self, obj):

@@ -10,7 +10,7 @@ class DummyQuat:
 
 class VelocityTest(unittest.TestCase):
     def test_str_representation(self):
-        v = Velocity(vl.Vector(1.234, 2.345, 3.456))
+        v = Velocity(1.234, 2.345, 3.456)
         s = str(v)
         # basic checks: keys and numeric substrings
         self.assertIn('vx:', s)
@@ -21,30 +21,30 @@ class VelocityTest(unittest.TestCase):
         self.assertIn('2.345', s)
 
     def test_update_with_identity_quaternion(self):
-        v = Velocity(vl.Vector())
+        v = Velocity()
         q = DummyQuat()
         # zero acceleration -> velocity should become gravity * dt
         v.update(vl.Vector(), q, 1.0)
-        vx, vy, vz = v.values()
+        vx, vy, vz = v()
         self.assertAlmostEqual(vx, 0.0, places=6)
         self.assertAlmostEqual(vy, 0.0, places=6)
         self.assertAlmostEqual(vz, gl.Earth().g, places=6)
 
         # non-zero acceleration
-        v2 = Velocity(vl.Vector())
+        v2 = Velocity()
         accel = vl.Vector(1.0, 0.0, 0.0)
         dt = 2.0
         v2.update(accel, q, dt)
-        vx2, vy2, vz2 = v2.values()
+        vx2, vy2, vz2 = v2()
         # expected: dt * (accel + gravity)
         self.assertAlmostEqual(vx2, dt * 1.0, places=6)
         self.assertAlmostEqual(vy2, 0.0, places=6)
         self.assertAlmostEqual(vz2, dt * gl.Earth().g, places=6)
 
     def test_correct_adds_vector(self):
-        v = Velocity(vl.Vector())
+        v = Velocity()
         v.correct(vl.Vector(0.5, -0.5, 1.0))
-        vx, vy, vz = v.values()
+        vx, vy, vz = v()
         self.assertAlmostEqual(vx, 0.5, places=6)
         self.assertAlmostEqual(vy, -0.5, places=6)
         self.assertAlmostEqual(vz, 1.0, places=6)
