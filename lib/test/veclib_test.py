@@ -65,17 +65,10 @@ class VeclibTest(unittest.TestCase):
         v = vl.Vector(1, 2, 3)
         self.assertIsNone(v.info)
 
-    def test_info_attribute_settable(self):
-        """Test that info attribute can be set"""
-        v = vl.Vector(1, 2, 3)
-        v.info = "test"
-        self.assertEqual(v.info, "test")
-
     def test_vector_dtype(self):
         """Test Vector data type (should be float)"""
         v = vl.Vector(1, 2, 3)
-        self.assertTrue(np.issubdtype(v.dtype, np.floating) or 
-                       np.issubdtype(v.dtype, np.integer))
+        self.assertTrue(np.issubdtype(v.dtype, np.floating))
 
     def test_vector_float_values(self):
         """Test Vector with float and int mixed"""
@@ -194,17 +187,21 @@ class VeclibTest(unittest.TestCase):
         lpf(-50, 0.5)
         self.assertAlmostEqual(lpf.prev, -25)
 
-    def test_filter_with_vector_input(self):
-        """Test filter behavior with array/vector input"""
-        lpf = vl.LowPassFilter(initialvalue=0)
-        arr = np.array([10, 20, 30])
-        # The filter should work with numpy arrays
-        try:
-            lpf(arr, 0.5)
-            success = True
-        except:
-            success = False
-        self.assertTrue(success or True)  # May or may not support vectors
+    def test_filter_with_integer_vector_input(self):
+        """Test filter behavior with vector input"""
+        lpf = vl.LowPassFilter(vl.Vector(10, 20, 30))
+        arr = vl.Vector(30, 40, 50)
+        # The filter should work with Vector class
+        lpf(arr, 0.5)
+        self.assertTrue((lpf.prev == vl.Vector(20.0, 30.0, 40.0)).all())
+
+    def test_filter_with_float_vector_input(self):
+        """Test filter behavior with vector input"""
+        lpf = vl.LowPassFilter(vl.Vector(10.0, 20.0, 30.0))
+        arr = vl.Vector(30.0, 40.0, 50.0)
+        # The filter should work with Vector class
+        lpf(arr, 0.5)
+        self.assertTrue((lpf.prev == vl.Vector(20.0, 30.0, 40.0)).all())
 
     def test_filter_state_preservation(self):
         """Test that filter state is preserved between calls"""

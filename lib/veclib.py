@@ -9,7 +9,7 @@ class Vector(np.ndarray):
 
     def __new__(cls, a, b, c):
         # create a new instance as a column vector
-        obj = np.asarray([a, b, c]).reshape(-1,1).view(cls)
+        obj = np.asarray(list(map(float, [a, b, c]))).reshape(-1,1).view(cls)
         obj.info = None
         return obj
 

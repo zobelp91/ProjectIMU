@@ -37,6 +37,7 @@
     <Compile Include="lib\geolib.py" />
     <Compile Include="lib\test\filemanager_test.py" />
     <Compile Include="lib\plothelper.py" />
+    <Compile Include="lib\test\geolib_test.py" />
     <Compile Include="lib\test\veclib_test.py" />
     <Compile Include="lib\veclib.py" />
     <Compile Include="main.py" />
@@ -47,7 +48,6 @@
     <Compile Include="RPi\NMEA_stream.py" />
     <Compile Include="RPi\RTStrapdown_Kalman.py" />
     <Compile Include="RPi\RTStrapdown_plot.py" />
-    <Compile Include="lib\constants.py" />
     <Compile Include="src\Euler.py" />
     <Compile Include="src\Kalman.py" />
     <Compile Include="src\Position.py" />
