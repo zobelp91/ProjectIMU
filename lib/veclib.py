@@ -10,6 +10,15 @@ class Vector(np.ndarray):
     def __new__(cls, a=0, b=0, c=0, info=None):
         # create a new instance as a column vector
         obj = np.asarray(list(map(float, [a, b, c]))).reshape(-1,1).view(cls)
+        obj.info = info # custom metadata
+        return obj
+    
+    # Alternative Constructor Option
+    @classmethod
+    def from_array(cls, array, info=None):
+        # view-cast it into our subclass
+        obj = array.reshape(-1,1).view(cls)
+        # Attach the metadata
         obj.info = info
         return obj
 

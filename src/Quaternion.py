@@ -2,54 +2,80 @@ import veclib as vl
 import math as m
 import numpy as np
 
+class Quaternion(np.ndarray):
+    """Derived class for handling 4x1-arrays"""
 
-class Quaternion(object):
-    """class Quaternion describes the transformation between 2 coordinate systems using 4 parameters"""
-
-    def __init__(self, euler=vl.toVector(0.0, 0.0, 0.0)):
-        """Quaternion is initiated by Euler angles
-        the angles are given in radians um.sing ZYX-convention
+    def __new__(cls, phi=0, theta=0, psi=0, info=None):
+        """Quaternion is constructed from Euler angles or from an existing numpy array 
+        the angles are given in radians using ZYX-convention
         """
-        phi, theta, psi = vl.toValue(euler)
+        # create object from Euler angles
+        phBy2 = phi / 2
+        thBy2 = theta / 2
+        psBy2 = psi / 2
 
-        ph2 = phi / 2
-        th2 = theta / 2
-        ps2 = psi / 2
+        q0 = m.cos(phBy2) * m.cos(thBy2) * m.cos(psBy2) + m.sin(phBy2) * m.sin(thBy2) * m.sin(psBy2)
+        q1 = m.sin(phBy2) * m.cos(thBy2) * m.cos(psBy2) - m.cos(phBy2) * m.sin(thBy2) * m.sin(psBy2)
+        q2 = m.cos(phBy2) * m.sin(thBy2) * m.cos(psBy2) + m.sin(phBy2) * m.cos(thBy2) * m.sin(psBy2)
+        q3 = m.cos(phBy2) * m.cos(thBy2) * m.sin(psBy2) - m.sin(phBy2) * m.sin(thBy2) * m.cos(psBy2)
 
-        q0 = m.cos(ph2) * m.cos(th2) * m.cos(ps2) + m.sin(ph2) * m.sin(th2) * m.sin(ps2)
-        q1 = m.sin(ph2) * m.cos(th2) * m.cos(ps2) - m.cos(ph2) * m.sin(th2) * m.sin(ps2)
-        q2 = m.cos(ph2) * m.sin(th2) * m.cos(ps2) + m.sin(ph2) * m.cos(th2) * m.sin(ps2)
-        q3 = m.cos(ph2) * m.cos(th2) * m.sin(ps2) - m.sin(ph2) * m.sin(th2) * m.cos(ps2)
+        # create a new instance as a column vector
+        obj = np.asarray(list(map(float, [q0, q1, q2, q3]))).reshape(-1,1).view(cls)
+        obj.info = info # custom metadata
+        return obj
 
-        self.values = vl.toVector(q0, q1, q2, q3)
+    # 2. Alternative Constructor Option
+    @classmethod
+    def from_list(cls, array, info=None):
+        # view-cast it into our subclass
+        obj = np.asarray(list(map(float, array))).reshape(-1,1).view(cls)
+        # Attach the metadata
+        obj.info = info
+        return obj
+
+    # 3. Alternative Constructor Option
+    @classmethod
+    def from_array(cls, array, info=None):
+        # view-cast it into our subclass
+        obj = array.reshape(-1,1).view(cls)
+        # Attach the metadata
+        obj.info = info
+        return obj
+
+    def __array_finalize__(self, obj):
+        if obj is None: return
+        # copies attributes from the original object to the new one
+        self.info = getattr(obj, 'info', None)
+
+    def __call__(self):
+        return self[0,0], self[1,0], self[2,0], self[3,0]
 
     def __str__(self):
-        q0, q1, q2, q3 = vl.toValue(self.values)
-        return "q0: {:2.3f}, q1: {:2.3f}, q2: {:2.3f}, q3: {:2.3f}".format(
-            q0, q1, q2, q3
-        )
+        q0, q1, q2, q3 = self()
+        return "q0: {:2.3f}, q1: {:2.3f}, q2: {:2.3f}, q3: {:2.3f}".format(q0, q1, q2, q3)
 
-    def __mul__(self, value):
-        """multiplicates self with another Quaternionen combining both rotations
-        return is a new Quaternion-object
+    def __mul__(self, other):
+        """multiplication operator for quaternion multiplication
         """
-        new_quat = Quaternion()
-        if isinstance(value, Quaternion):
-            new_quat.values = vl.mvMultiplication(self.values, value.values)
-            return new_quat
-        elif isinstance(value, (int, np.long, float)):
-            print("scalar multiplication is not implemented yet")
+        a, b, c, d = self()
+        res = np.dot(np.array([[a, -b, -c, -d], [b, a, -d, c], [c, d, a, -b], [d, -c, b, a]]), other)
+        return Quaternion.from_array(res)
 
-    def getRotationMatrix(self):
+    def asRotationMatrix(self):
         """creates the 3x3 rotation matrix from quaternion parameters
         represents the same relation between coordinate systems
         return a numpy.matrix
         """
-        q0, q1, q2, q3 = vl.toValue(self.values)
+        q0, q1, q2, q3 = self()
 
-        r11 = q0**2 + q1**2 - q2**2 - q3**2
-        r22 = q0**2 - q1**2 + q2**2 - q3**2
-        r33 = q0**2 - q1**2 - q2**2 + q3**2
+        q0_2 = q0**2
+        q1_2 = q1**2
+        q2_2 = q2**2
+        q3_2 = q3**2
+
+        r11 = q0_2 + q1_2 - q2_2 - q3_2
+        r22 = q0_2 - q1_2 + q2_2 - q3_2
+        r33 = q0_2 - q1_2 - q2_2 + q3_2
         r12 = 2 * (q1 * q2 - q0 * q3)
         r13 = 2 * (q1 * q3 + q0 * q2)
         r23 = 2 * (q2 * q3 - q0 * q1)
@@ -57,45 +83,47 @@ class Quaternion(object):
         r31 = 2 * (q1 * q3 - q0 * q2)
         r32 = 2 * (q2 * q3 + q0 * q1)
 
-        return np.matrix([[r11, r12, r13], [r21, r22, r23], [r31, r32, r33]])
+        return np.array([[r11, r12, r13], [r21, r22, r23], [r31, r32, r33]])
 
-    def getEulerAngles(self):
+    def asEulerAngles(self):
         """calculates Euler angles from the current Quaternion
         result is given in a 3x1 vector in radians
         """
 
-        q0, q1, q2, q3 = vl.toValue(self.values)
+        q0, q1, q2, q3 = self()
 
         try:
-            phi = m.atan2(2 * (q0 * q1 + q2 * q3), 1 - 2 * (q1**2 + q2**2))
-            st = 2 * (q0 * q2 - q3 * q1)
-            st = 1 if st > 1 else st  # gimbal lock
-            st = -1 if st < -1 else st
+            phi = m.atan2(2.0 * (q0 * q1 + q2 * q3), 1.0 - 2.0 * (q1**2 + q2**2))
+            st = 2.0 * (q0 * q2 - q3 * q1)
+            st = 1.0 if st > 1.0 else st  # gimbal lock
+            st = -1.0 if st < -1.0 else st
             theta = m.sin(st)
-            psi = m.atan2(2 * (q0 * q3 + q1 * q2), 1 - 2 * (q2**2 + q3**2))
+            psi = m.atan2(2.0 * (q0 * q3 + q1 * q2), 1.0 - 2.0 * (q2**2 + q3**2))
         except ValueError:
-            raise ValueError("Quaternion is invalid", q0, q1, q2, q3)
+            raise ValueError("Quaternion is invalid", self())
 
-        return vl.toVector(phi, theta, psi)
+        return vl.Vector(phi, theta, psi) #TODO make this a euler class
 
-    def update(self, rotationRate, DT):
+    def update(self, rotationRate, dt):
         """updates the quaternion via the rotation of the last period
         the rotation rate is a 3x1 vector - wx, wy, wz
         approximated quaternion differential equation
         """
-        w = rotationRate * DT
-        wx, wy, wz = vl.toValue(w)
+        w = rotationRate * dt
+        wx, wy, wz = w()
         norm = m.hypot(wx, wy, wz)
 
         # series expansion
-        r1 = 1 - (1 / 8) * norm**2 + (1 / 384) * norm**4 - (1 / 46080) * norm**6
-        factor = (
-            0.5 - (1 / 48) * norm**2 + (1 / 3840) * norm**4 - (1 / 645120) * norm**6
-        )
+        norm2 = norm**2
+        norm4 = norm**4
+        norm6 = norm**6
+        r1 = 1.0 - (1.0 / 8.0) * norm2 + (1.0 / 384.0) * norm4 - (1.0 / 46080.0) * norm6
+        factor = (0.5 - (1.0 / 48.0) * norm2 + (1.0 / 3840.0) * norm4 - (1.0 / 645120.0) * norm6)
         r234 = w * factor
         r = np.insert(r234, 0, r1)
+        res = self * Quaternion.from_array(r)
 
-        self.values = vl.mvMultiplication(self.values, r.transpose())
+        self[range(4),0] = res[range(4),0]
 
     def vecTransformation(self, vector):
         """transformation via quaternion like q . vector . q*
@@ -103,39 +131,13 @@ class Quaternion(object):
         return a 3x1 vector
         """
         vector = np.insert(vector, 0, 0)
-        vector = vector.transpose()
+        vector = Quaternion.from_array(vector)
 
-        f1 = vl.mvMultiplication(self.values, vector)
-
-        conjQuat = self.getConjugatedQuaternion()
-        res = vl.mvMultiplication(f1, conjQuat.values)
-        return res[1:4]
+        # quaternion multiplication
+        res = self * vector * self.getConjugatedQuaternion()
+        return vl.Vector.from_array(res[1:4])
 
     def getConjugatedQuaternion(self):
         """returns the conjugated quaternion"""
-        conjQuat = Quaternion()
-        q0, q1, q2, q3 = vl.toValue(self.values)
-        conjQuat.values = vl.toVector(q0, -q1, -q2, -q3)
-        return conjQuat
-
-
-def main():
-    q = Quaternion()
-    q2 = Quaternion()
-    z = q * q2
-    print(z)
-
-
-if __name__ == "__main__":
-    main()
-
-    #TODO: move to quaternion.py
-# def mvMultiplication(vector1, vector2):
-#     """np.matrix-vector multiplication
-#     returns a 4x1 vector
-#     """
-#     a, b, c, d = toValue(vector1)
-#     return (
-#         np.matrix([[a, -b, -c, -d], [b, a, -d, c], [c, d, a, -b], [d, -c, b, a]])
-#         * vector2
-#     )
+        q0, q1, q2, q3 = self()
+        return Quaternion.from_list([q0, -q1, -q2, -q3])
