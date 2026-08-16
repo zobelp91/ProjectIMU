@@ -48,6 +48,24 @@ class QuaternionTest(unittest.TestCase):
         self.assertTrue(math.isclose(q2, -c2, rel_tol=1e-12))
         self.assertTrue(math.isclose(q3, -c3, rel_tol=1e-12))
 
+    def test_from_acceleration_magnetic_constructs_valid_quaternion(self):
+        # construct quaternion from accelerometer and magnetometer readings
+        acc = vl.Vector(0.0, 0.0, -9.81)
+        mag = vl.Vector(18.0, 5.0, -40.0)
+        q = Quaternion.from_acceleration_magnetic(acc, mag)
+
+        # check returned type behaves like quaternion and has unit norm
+        vals = q()
+        norm = math.sqrt(sum(float(v) ** 2 for v in vals))
+        self.assertTrue(math.isclose(norm, 1.0, rel_tol=1e-6, abs_tol=1e-6))
+
+        # rotated acceleration should point approximately down in body frame
+        acc_rot = q.vecTransformation(acc)
+        x, y, z = acc_rot()
+        self.assertTrue(math.isclose(x, 0.0, rel_tol=1e-6, abs_tol=1e-5))
+        self.assertTrue(math.isclose(y, 0.0, rel_tol=1e-6, abs_tol=1e-5))
+        self.assertTrue(math.isclose(z, -9.81, rel_tol=1e-3, abs_tol=1e-2))
+
     def test_update_preserves_unit_norm(self):
         q = Quaternion()
         rot = vl.Vector(0.1, 0.2, -0.05)
@@ -109,6 +127,28 @@ class QuaternionTest(unittest.TestCase):
 
         # compare results
         x1, y1, z1 = result_quat()
+        x2, y2, z2 = result_matrix[0, 0], result_matrix[1, 0], result_matrix[2, 0]
+
+        self.assertTrue(math.isclose(x1, x2, rel_tol=1e-9, abs_tol=1e-12))
+        self.assertTrue(math.isclose(y1, y2, rel_tol=1e-9, abs_tol=1e-12))
+        self.assertTrue(math.isclose(z1, z2, rel_tol=1e-9, abs_tol=1e-12))
+
+    def test_vecTransformation_conjugate_matches_rotation_matrix_transpose(self):
+        # conjugated quaternion should correspond to inverse rotation (rotation matrix transpose)
+        phi, theta, psi = 0.3, -0.15, 0.8
+        q = Quaternion(phi, theta, psi)
+        vector = vl.Vector(2.1, -1.5, 0.9)
+
+        # method 1: conjugated quaternion transformation
+        q_conj = q.getConjugatedQuaternion()
+        result_conj = q_conj.vecTransformation(vector)
+
+        # method 2: rotation matrix transpose (inverse)
+        R = q.asRotationMatrix()
+        result_matrix = R.T @ vector
+
+        # compare results
+        x1, y1, z1 = result_conj()
         x2, y2, z2 = result_matrix[0, 0], result_matrix[1, 0], result_matrix[2, 0]
 
         self.assertTrue(math.isclose(x1, x2, rel_tol=1e-9, abs_tol=1e-12))

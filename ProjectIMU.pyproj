@@ -50,11 +50,11 @@
     <Compile Include="RPi\NMEA_stream.py" />
     <Compile Include="RPi\RTStrapdown_Kalman.py" />
     <Compile Include="RPi\RTStrapdown_plot.py" />
-    <Compile Include="src\Euler.py" />
     <Compile Include="src\Kalman.py" />
     <Compile Include="src\Position.py" />
     <Compile Include="src\Quaternion.py" />
     <Compile Include="src\Strapdown.py" />
+    <Compile Include="src\test\Kalman_test.py" />
     <Compile Include="src\test\Position_test.py" />
     <Compile Include="src\test\Quaternion_test.py" />
     <Compile Include="src\test\Velocity_test.py" />

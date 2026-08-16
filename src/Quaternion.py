@@ -1,23 +1,15 @@
 import veclib as vl
 import math as m
 import numpy as np
+import geolib as gl
 
 class Quaternion(np.ndarray):
     """Derived class for handling 4x1-arrays"""
 
     def __new__(cls, phi=0, theta=0, psi=0, info=None):
-        """Quaternion is constructed from Euler angles or from an existing numpy array 
-        the angles are given in radians using ZYX-convention
+        """Quaternion is constructed from Euler angles. The angles are given in radians using ZYX-convention
         """
-        # create object from Euler angles
-        phBy2 = phi / 2
-        thBy2 = theta / 2
-        psBy2 = psi / 2
-
-        q0 = m.cos(phBy2) * m.cos(thBy2) * m.cos(psBy2) + m.sin(phBy2) * m.sin(thBy2) * m.sin(psBy2)
-        q1 = m.sin(phBy2) * m.cos(thBy2) * m.cos(psBy2) - m.cos(phBy2) * m.sin(thBy2) * m.sin(psBy2)
-        q2 = m.cos(phBy2) * m.sin(thBy2) * m.cos(psBy2) + m.sin(phBy2) * m.cos(thBy2) * m.sin(psBy2)
-        q3 = m.cos(phBy2) * m.cos(thBy2) * m.sin(psBy2) - m.sin(phBy2) * m.sin(thBy2) * m.cos(psBy2)
+        q0, q1, q2, q3 = cls._euler2quaternion(phi, theta, psi)
 
         # create a new instance as a column vector
         obj = np.asarray(list(map(float, [q0, q1, q2, q3]))).reshape(-1,1).view(cls)
@@ -42,6 +34,35 @@ class Quaternion(np.ndarray):
         obj.info = info
         return obj
 
+    # 4. Alternative Constructor Option
+    @classmethod
+    def from_acceleration_magnetic(cls, acc, mag, info=None):
+        earthParam = gl.Earth()
+        ax, ay, az = acc()
+        mx, my, mz = mag()
+        # sanity check
+        if m.isclose(m.hypot(ax, ay, az), 0.0, abs_tol=0.001):
+            raise ValueError("Acceleration is not significant")
+        if m.isclose(m.hypot(mx, my, mz), 0.0, abs_tol=0.001):
+            raise ValueError("MagneticFlux is not significant")
+
+        # calculate roll and pitch from acceleration
+        phi = -m.atan2(ay, -az)
+        theta = m.asin(ax / earthParam.g)
+
+        # transformation to horizontal coordinate system - psi = 0
+        q = Quaternion(phi, theta, 0.0)
+        mHor = q.vecTransformation(mag)
+        mxh, myh, _ = mHor()
+
+        psi = m.atan2(myh, mxh) - earthParam.declination
+        q0, q1, q2, q3 = cls._euler2quaternion(phi, theta, psi)
+
+        # create a new instance as a column vector
+        obj = np.asarray(list(map(float, [q0, q1, q2, q3]))).reshape(-1,1).view(cls)
+        obj.info = info # custom metadata
+        return obj
+
     def __array_finalize__(self, obj):
         if obj is None: return
         # copies attributes from the original object to the new one
@@ -56,15 +77,37 @@ class Quaternion(np.ndarray):
 
     def __mul__(self, other):
         """multiplication operator for quaternion multiplication
+        https://de.mathworks.com/help/aeroblks/quaternionmultiplication.html
         """
         a, b, c, d = self()
         res = np.dot(np.array([[a, -b, -c, -d], [b, a, -d, c], [c, d, a, -b], [d, -c, b, a]]), other)
         return Quaternion.from_array(res)
 
+    def _euler2quaternion(phi, theta, psi):
+        """https://www.firgelliauto.com/blogs/engineering-calculators/euler-angle-to-quaternion-converter
+        """
+        #find half angles
+        phBy2 = phi / 2.0     #roll
+        thBy2 = theta / 2.0   #pitch
+        psBy2 = psi / 2.0     #yaw
+
+        cosPhBy2 = m.cos(phBy2)
+        sinPhBy2 = m.sin(phBy2)
+        cosThBy2 = m.cos(thBy2)
+        sinThBy2 = m.sin(thBy2)
+        cosPsBy2 = m.cos(psBy2)
+        sinPsBy2 = m.sin(psBy2)
+
+        q0 = cosPhBy2 * cosThBy2 * cosPsBy2 + sinPhBy2 * sinThBy2 * sinPsBy2
+        q1 = sinPhBy2 * cosThBy2 * cosPsBy2 - cosPhBy2 * sinThBy2 * sinPsBy2
+        q2 = cosPhBy2 * sinThBy2 * cosPsBy2 + sinPhBy2 * cosThBy2 * sinPsBy2
+        q3 = cosPhBy2 * cosThBy2 * sinPsBy2 - sinPhBy2 * sinThBy2 * cosPsBy2
+        return q0, q1, q2, q3
+
     def asRotationMatrix(self):
         """creates the 3x3 rotation matrix from quaternion parameters
         represents the same relation between coordinate systems
-        return a numpy.matrix
+        https://www.firgelliauto.com/es/blogs/engineering-calculators/quaternion-to-rotation-matrix-calculator
         """
         q0, q1, q2, q3 = self()
 
